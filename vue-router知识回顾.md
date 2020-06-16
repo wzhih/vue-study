@@ -209,10 +209,85 @@ const router = new VueRouter({
 ```
 
 
+## 进阶
+
+### 导航守卫
+
+> "导航"表示路由正在发生变化
+> "守卫"表示自定义钩子函数
+
+**完整的导航解析流程**
+一般第3步的守卫用的比较多
+
+1. 导航被触发
+2. 在失活的组件里调用 `beforeRouteLeave` 守卫
+3. 调用全局的 `beforeEach` 守卫
+4. 在重用的组件里调用 `beforeRouteUpdate` 守卫 (2.2+)
+5. 在路由配置里调用 `beforeEnter`
+6. 解析异步路由组件。
+7. 在被激活的组件里调用 `beforeRouteEnter`
+8. 调用全局的 `beforeResolve` 守卫 (2.5+)
+9. 导航被确认
+10. 调用全局的 `afterEach` 钩子
+11. 触发 `DOM` 更新
+12. 用创建好的实例调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数
+
+#### 全局前置守卫
+
+使用`router.beforeEach`注册一个全局前置守卫
+这个守卫会在解析流程里面的第3步触发
+
+
+#### 全局解析守卫
+
+你可以用 `router.beforeResolve` 注册一个全局守卫。
+这和 `router.beforeEach` 类似，区别是在导航被确认之前，**同时在所有组件内守卫和异步路由组件被解析之后**，解析守卫就被调用
+这个守卫会在解析流程里面的第8步触发
+
+
+#### 全局后置钩子
+
+你也可以注册`router.afterEach`全局后置钩子，然而和守卫不同的是，这些钩子不会接受 `next` 函数也不会改变导航本身
+这个守卫会在解析流程里面的第10步触发
+
+
+#### 路由独享的守卫
+
+可以在路由配置上直接定义 `beforeEnter` 守卫
+这个守卫会在解析流程里面的第5步触发
+
+
+#### 组件内的守卫
+
+* `beforeRouteEnter`
+* `beforeRouteUpdate`
+* `beforeRouteLeave`
+
+
+### 路由元信息
+
+`routes`定义路由的时候可以配置`meta`字段，这个字段可以存储开发者的一些自定义字段
+
+用于鉴权、icon等等
+
+
+### 过度动效
+
+可以在`<router-view></router-view>`外添加`<transition>`设置过度效果
+
+
+### 数据获取
+
+有两中方式，以A页面组件跳转B页面组件为例
+
+* 导航完成之后获取：跳转到B页面之后，开启loding加载中指示，直到数据获取成功或失败
+  * `created`钩子函数
+* 导航完成之前获取：跳转到B页面之前还在A页面，获取数据，成功后再渲染出B页面
+  * `beforeRouteEnter`、`beforeRouteUpdate`
 
 
 
-
+### 滚动行为、路由懒加载
 
 
 
