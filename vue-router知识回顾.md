@@ -29,7 +29,7 @@
 
 ## 基础
 
-#### 动态路由匹配
+### 动态路由匹配
 
 **为什么需要动态路由匹配**
 
@@ -66,12 +66,147 @@ const router = new VueRouter({
 * 路由优先级是：先定义的先匹配
 
 
-#### 嵌套(视图)路由
+### 嵌套(视图)路由
 
-实际上的页面应用，经常是通过组件嵌套组合成的，同样的`url`中的各段动态参数也可以映射嵌套的各层组件
+实际上，页面应用，经常是通过组件嵌套组合成的，同样的`url`中的各段动态参数也可以映射嵌套的各层组件
 
 通过父组件添加`<router-view>`，`Vue Router`参数中使用`children`配置参数来嵌套子组件
 
+以`/`开头的嵌套路径会被当成根路径(意思是：嵌套组件的父组件的`path`不是必须显示的)，如下例子：
+
+```html
+<div id="app">
+    <div>
+        <router-link to="/root/one">Go to</router-link>
+        <router-link to="/two">Go to</router-link>
+    </div>
+    <router-view></router-view>
+</div>
+```
+
+```js
+const Root = { template: `
+        <div>
+            <h3>this is root</h3>
+            <router-view></router-view>
+        </div>
+    ` }
+const One = { template: '<div>One</div>' }
+const Two = { template: '<div>Two</div>' }
+    
+const router = new VueRouter({
+  routes: [
+    {
+        path: "/root",
+        component: Root,
+        children: [
+            {
+                //访问路径：/root/one
+                path: "one",
+                component: One
+            },
+            {
+                //访问路径： /two
+                path: "/two",
+                component: Two
+            }
+        ]
+    }
+  ]
+})
+
+const app = new Vue({
+      'el': '#app',
+      router
+})
+```
+可以发现，我们通过`/two`即可以访问`Root嵌套Two`的页面组件
+
+
+### 编程式导航
+
+普通html页面，路由的切换，除了可以通过`<a>`标签变化，还可以通过`js`对`window.location`对象的修改进行切换，这就是编程式导航
+
+`vue`可以使用`<router-link>`创建`<a>`标签定义导航链接，也可以通过对`$router`实例的方法调用，进行导航、切换路由
+
+浏览器会记录访问过的路由历史记录，可以说是一个数组，最尾部的记录就是当前路由，`$router`实例提供方法去操作这个数组
+
+| 方法 | 作用 |
+|---|---|
+| `push` | 往这个数组尾部添加一项，所以，会跳转到最尾部的路由记录上 |
+| `replace` | 与`push`挺像的，但是他是替换掉数组尾部，也就是当前的路由记录 |
+| `go` | 参数是整数，代表往前会往后跳转多少个路由记录 |
+
+
+### 命名路由
+
+其实就是给路由起个唯一的名字，在想要跳转到某个路由的时候可以使用这个名字，好处：
+
+* 路由太长了，路由名字比较短
+* 路由可能会被修改，但只要路由名称不改，使用路由名称照样不用修改
+
+
+### 命名视图
+
+在同一级，可以有多个`<router-view name=''></router-view>`，只要`name`属性不一样
+相对应的，多个视图显示，就代表需要映射多个组件，如下例子：
+
+```html
+<router-view class="view one"></router-view>
+<router-view class="view two" name="a"></router-view>
+<router-view class="view three" name="b"></router-view>
+```
+
+```js
+const router = new VueRouter({
+  routes: [
+    {
+      path: '/',
+      components: {
+        default: Foo,
+        a: Bar,
+        b: Baz
+      }
+    }
+  ]
+})
+```
+
+### 重定向与别名
+
+重定向是通过`routes`的配置来完成的
+
+只需要添加`redirect`属性，值是想要跳转到哪个路由的标识(`path`、`name`、函数)
+
+重定向实质上是路由切换，跳转。别名是一个组件有两个路由匹配，通过这个两个路由都可以访问此组件，且路由不变
+
+
+### 路由组件传参
+
+**动态路由匹配**的时候说过，可以从路由中获取参数，组件通过`$route`实例获取参数值
+
+因为组件与`$route`高度耦合，这样子做只适合一次性组件，不适合多次复用的基础组件，所以就有了路由组件传参
+
+视图组件只需要像普通组件那样添加`props`属性，然后在`routes`配置中添加`props`属性，且值为`true`，`route.params`将会被设置为组件属性
+
+```js
+const User = {
+  props: ['id'],
+  template: '<div>User {{ id }}</div>'
+}
+const router = new VueRouter({
+  routes: [
+    { path: '/user/:id', component: User, props: true },
+
+    // 对于包含命名视图的路由，你必须分别为每个命名视图添加 `props` 选项：
+    {
+      path: '/user/:id',
+      components: { default: User, sidebar: Sidebar },
+      props: { default: true, sidebar: false }
+    }
+  ]
+})
+```
 
 
 
