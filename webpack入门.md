@@ -60,6 +60,7 @@
 
 ```js
 const HtmlWebpackPlugin = require('html-webpack-plugin'); //通过 npm 安装
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const webpack = require('webpack'); //访问内置的插件
 const path = require('path');
 
@@ -70,21 +71,22 @@ module.exports = {
   entry: './src/index.js',
   //出口
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.[hash:8].js',
     path: path.resolve(__dirname, 'dist')
   },
   module: {
     rules: [
       // 引入加载器列表
-      { test: /\.txt$/, use: 'raw-loader' },
-      { test: /\.css$/, use: 'css-loader' },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.ts$/, use: 'ts-loader' }
     ]
   },
   plugins: [
     // 引入插件列表
-    new webpack.optimize.UglifyJsPlugin(),
-    new HtmlWebpackPlugin({template: './src/index.html'})
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+        title: 'index'
+    })
   ]
 };
 
