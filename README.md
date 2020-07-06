@@ -3,7 +3,8 @@ Vue 学习笔记
 
 ## 思维导图
 
-* [vue导图](vue导图.xmind)
+* ![vue导图](vue.png)
+
 
 ## 阅读顺序：
 
